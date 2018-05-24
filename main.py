@@ -21,11 +21,11 @@ def train(net, dataloader, optimizer, criterion, epoch):
 
         # forward + backward + optimize
         outputs = net(inputs)
-        tensor_label = np.zeros(outputs.shape, dtype=float)
+        '''tensor_label = np.zeros(outputs.shape, dtype=float)
         for j in range(labels.shape[0]):
             tensor_label[j][labels[j]] = 1.0
-        tensor_label = torch.Tensor(tensor_label)
-        loss = criterion(outputs, tensor_label)
+        tensor_label = torch.Tensor(tensor_label)'''
+        loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
 

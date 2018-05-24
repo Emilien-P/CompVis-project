@@ -21,7 +21,7 @@ class BaseModel(nn.Module):
         self.logFile.write(str + '\n')
 
     def criterion(self):
-        return nn.MSELoss()
+        return nn.CrossEntropyLoss()
 
     def optimizer(self):
         return optim.SGD(self.parameters(), lr=0.001)
@@ -37,7 +37,7 @@ class BaseModel(nn.Module):
 class LazyNet(BaseModel):
     def __init__(self):
         super(LazyNet, self).__init__()
-        self.lin1 = nn.Linear(32 * 32 * 3, 10)
+        self.lin1 = nn.Linear(32 * 32 * 3, 101)
 
     def forward(self, x):
         x = x.view(-1, 32*32*3)
