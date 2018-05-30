@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 import time
+import sys
 
 from PIL import Image
 import torch
@@ -55,7 +56,7 @@ parser.add_argument('--world-size', default=1, type=int,
 parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
                     help='url used to set up distributed training')
 parser.add_argument('--dist-backend', default='gloo', type=str,
-                    help='distributed backend')
+                       help='distributed backend')
 
 best_prec1 = 0
 
@@ -108,7 +109,7 @@ def main():
                   .format(args.resume, checkpoint['epoch']))
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
-
+    #print("made it past resume")
     cudnn.benchmark = True
 
     # Data loading code
@@ -117,21 +118,21 @@ def main():
     #valdir =
     # traindir = basestr
     # valdir = basestr
-
-    traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'train') #TODO CHANGGE BACK
+    #print("made it to train loading")
+    traindir = os.path.join(args.data, 'train_images')
+    valdir = os.path.join(args.data, 'test_images') #TODO CHANGGE BACK
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
     train_dataset = datasets.ImageFolder(
         traindir,
         transforms.Compose([
-            transforms.RandomResizedCrop(224),
+            transforms.RandomResizedCrop(224, scale=(.1,1)),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
         ]))
-
+    #print("made it it to train loading 2")
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     else:
@@ -140,7 +141,7 @@ def main():
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
-
+    #print("loading 3")
     val_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(valdir, transforms.Compose([
             transforms.Resize(256),
@@ -155,14 +156,16 @@ def main():
         validate(val_loader, model, criterion)
         return
 
+    print("starting run, should take about 10 minutes to start")
     for epoch in range(args.start_epoch, args.epochs):
+        #print("made here 1")
         if args.distributed:
             train_sampler.set_epoch(epoch)
         adjust_learning_rate(optimizer, epoch)
-
+        #print("made here 2")
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch)
-
+        #print("made here 3")
         # evaluate on validation set
         prec1 = validate(val_loader, model, criterion)
 
@@ -190,22 +193,24 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
     end = time.time()
     # print(train_loader)
+    #print("made here 4")
     for i, (input, target) in enumerate(train_loader):
         # measure data loading time
+        #print("made here 5")
         data_time.update(time.time() - end)
 
         target = target.cuda(non_blocking=True)
-
+        #print("made here 6")
         # compute output
         output = model(input)
         loss = criterion(output, target)
-
+        #print("made here 7")
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output, target, topk=(1, 5))
         losses.update(loss.item(), input.size(0))
         top1.update(prec1[0], input.size(0))
         top5.update(prec5[0], input.size(0))
-
+        #print("made here 8")
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
@@ -224,7 +229,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
                   'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
                    epoch, i, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses, top1=top1, top5=top5))
-
+            sys.stdout.flush()
 
 def validate(val_loader, model, criterion):
     batch_time = AverageMeter()
