@@ -11,6 +11,7 @@ import tornado.web
 import tornado.websocket
 
 import methods
+from  PIL import Image, ImageFile
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -18,6 +19,15 @@ class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html", port=args.port)
 
+class req(tornado.web.RequestHandler):
+        def post(self):
+            file1 = self.request.files['fname'][0]
+            final_filename = 'test.jpg'
+            output_file = open('/homes/iws/tomn/cloudpull/client/bridge/image/test/' + final_filename, 'wb+')
+            output_file.write(file1['body'])
+            output_file = open('/homes/iws/tomn/cloudpull/client/bridge/' + final_filename, 'wb+')
+            output_file.write(file1['body'])
+            self.finish("file" + final_filename + " is uploaded")
 
 class WebSocket(tornado.websocket.WebSocketHandler):
 
@@ -48,7 +58,7 @@ parser.add_argument("--port", type=int, default=8000, help="The port on which "
 parser.add_argument("--resume", type=str, default="model_best.pth.tar")
 args = parser.parse_args()
 
-handlers = [(r"/", IndexHandler), (r"/websocket", WebSocket),
+handlers = [(r"/", IndexHandler), (r"/websocket", WebSocket), (r'/test', req),
             (r'/static/(.*)', tornado.web.StaticFileHandler,
              {'path': os.path.normpath(os.path.dirname(__file__))})]
 application = tornado.web.Application(handlers)

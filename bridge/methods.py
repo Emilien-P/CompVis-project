@@ -213,8 +213,8 @@ def count(number):
                     predcounter = 1
                     stringtoret = "";
                     for pred in top5:
-                        print("top " + str(predcounter) + " prediction is " + classes[pred-1])
-                        stringtoret = stringtoret + '\n' + "top " + str(predcounter) + " prediction is " + classes[pred-1]
+                        print("top " + str(predcounter) + " prediction is " + classes[pred])
+                        stringtoret = stringtoret + '\n' + "top " + str(predcounter) + " prediction is " + classes[pred] + '<br>'
 
                         predcounter = predcounter + 1
 
@@ -226,6 +226,8 @@ def count(number):
                 sys.stdout.flush()
         # TODO REMOVE
         keepGoing =  False
+        if 'Hot' in stringtoret:
+            stringtoret = stringtoret + '<br> <strong>This is likely to be a Hot Dawg! Please watch out for Gluten and Meat product.</strong>'
         return stringtoret
 
 
