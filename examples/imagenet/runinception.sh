@@ -1,0 +1,1 @@
+python main.py -a inception_v3 birdimgs/ --batch-size 90
