@@ -146,8 +146,8 @@ def main():
     #print("loading 3")
     val_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(valdir, transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
+            transforms.Resize(350),
+            transforms.CenterCrop(299),
             transforms.ToTensor(),
             normalize,
         ])),
@@ -215,7 +215,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         #print("HI!!!!!!!!!!!!!")
         #print(output)
         #print(target)
-        prec1, prec5 = accuracy(output, target, topk=(1, 5))
+        prec1, prec5 = accuracy(output, target, 0, topk=(1, 5))
         losses.update(loss.item(), input.size(0))
         top1.update(prec1[0], input.size(0))
         top5.update(prec5[0], input.size(0))
@@ -262,7 +262,7 @@ def validate(val_loader, model, criterion):
             else:
                 loss = criterion(output, target)
             # measure accuracy and record loss
-            prec1, prec5 = accuracy(output, target, topk=(1, 5))
+            prec1, prec5 = accuracy(output, target, 1, topk=(1, 5))
             losses.update(loss.item(), input.size(0))
             top1.update(prec1[0], input.size(0))
             top5.update(prec5[0], input.size(0))
@@ -317,13 +317,16 @@ def adjust_learning_rate(optimizer, epoch):
         param_group['lr'] = lr
 
 
-def accuracy(output, target, topk=(1,)):
+def accuracy(output, target, zeroistrain, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
     with torch.no_grad():
         maxk = max(topk)
         batch_size = target.size(0)
         #print(output[0])
-        _, pred = output[0].topk(maxk, 1, True, True)
+        if zeroistrain==0:
+            _, pred = output[0].topk(maxk, 1, True, True)
+        else:
+            _, pred = output.topk(maxk, 1, True, True)
         pred = pred.t()
         correct = pred.eq(target.view(1, -1).expand_as(pred))
 
