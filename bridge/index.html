@@ -7,10 +7,18 @@
         <script src="static/client.js" type="text/javascript"></script>
     </head>
     <body>
-        <h1>Python-Javascript communication</h1>
-        <p>Counting is hard. Let Python do the heavy lifting for you.</p>
-        <input class="number" type="text" value="0" />
-        <button class="submit" onclick="javascript:client.count($('.number').val())">count</button>
+
+
+        <h1>Food 101 Classifier</h1>
+        <form enctype="multipart/form-data" action='/test' method="post">
+        Image: <input type="file" name="fname"><br>
+        <input type="submit" value="upload">
+        </form>
+
+        <p> Predict!</p>
+        <input class="number" type="text" value="image" hidden=1/>
+
+      <button class="submit" onclick="buttonclicked()">Load and predict!</button>
         <h3>history</h3>
         <div class="answer"></div>
 
@@ -18,6 +26,9 @@
             // Connect a websocket to the server. The port notation is post-
             // processed server-side according to the config file
         client.connect({{port}});
+        function buttonclicked() {
+            client.count($('.number').val())
+        }
         </script>
 
     </body>
